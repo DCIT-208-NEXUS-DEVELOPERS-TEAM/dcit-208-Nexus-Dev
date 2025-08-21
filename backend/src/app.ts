@@ -24,6 +24,14 @@ import companiesRoutes from "./companies/routes";
 import applicationsRoutes from "./applications/routes";
 import filesRoutes from "./files/routes";
 
+// Import content routes
+import newsRoutes from "./content/news.routes";
+import projectsRoutes from "./content/projects.routes";
+import meetingsRoutes from "./content/meetings.routes";
+
+// Import search routes
+import searchRoutes from "./search/routes";
+
 const app = express();
 
 // Trust proxy (for accurate IP addresses behind load balancers)
@@ -93,6 +101,14 @@ app.use("/api/regions", regionsRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/applications", applicationsRoutes);
 app.use("/api/files", filesRoutes);
+
+// Content routes
+app.use("/api/news", newsRoutes);
+app.use("/api/projects", projectsRoutes);
+app.use("/api/meetings", meetingsRoutes);
+
+// Search routes
+app.use("/api/search", searchRoutes);
 
 // 404 handler
 app.use("*", (req, res) => {

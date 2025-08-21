@@ -1,28 +1,43 @@
 import { Router } from "express";
 import { prisma } from "../db/client";
-import { requireRole } from "../common/middleware/rbac";
+import {
+  authenticateToken,
+  requireRole,
+  requireRegionScope,
+} from "../common/middleware/auth";
 import { AppState, Role } from "@prisma/client";
 import { can, Transition } from "./fsm";
+import { successResponse, errorResponse } from "../common/http";
 
 const router = Router();
 
 // Create draft (Company Rep)
 router.post(
   "/",
+  authenticateToken,
   requireRole(Role.COMPANY_REP, Role.ADMIN),
-  async (req: any, res) => {
-    const { companyId, regionId, form } = req.body;
-    // optional: ensure user owns the company
-    const app = await prisma.membershipApplication.create({
-      data: {
-        companyId,
-        submittedById: req.user.id,
-        regionId,
-        form,
-        state: AppState.DRAFT,
-      },
-    });
-    res.status(201).json(app);
+  async (req: any, res, next) => {
+    try {
+      const { companyId, regionId, form } = req.body;
+      // optional: ensure user owns the company
+      const app = await prisma.membershipApplication.create({
+        data: {
+          companyId,
+          submittedById: req.user.id,
+          regionId,
+          form,
+          state: AppState.DRAFT,
+        },
+      });
+      return successResponse(
+        res,
+        app,
+        "Application draft created successfully",
+        201
+      );
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
@@ -60,23 +75,29 @@ router.post(
 // List (region-scoped for regional; global for national/admin)
 router.get(
   "/",
+  authenticateToken,
   requireRole(Role.ADMIN, Role.NATIONAL_SECRETARIAT, Role.REGIONAL_SECRETARIAT),
-  async (req: any, res) => {
-    const { state, regionId } = req.query as any;
-    const where: any = {};
-    if (state) where.state = state as AppState;
+  requireRegionScope,
+  async (req: any, res, next) => {
+    try {
+      const { state, regionId } = req.query as any;
+      const where: any = {};
+      if (state) where.state = state as AppState;
 
-    if (req.user.role === Role.REGIONAL_SECRETARIAT) {
-      where.regionId = req.user.regionId;
-    } else if (regionId) {
-      where.regionId = regionId;
+      if (req.user.role === Role.REGIONAL_SECRETARIAT) {
+        where.regionId = req.user.regionId;
+      } else if (regionId) {
+        where.regionId = regionId;
+      }
+      const apps = await prisma.membershipApplication.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        include: { company: true, region: true, submittedBy: true },
+      });
+      return successResponse(res, apps, "Applications retrieved successfully");
+    } catch (error) {
+      next(error);
     }
-    const apps = await prisma.membershipApplication.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      include: { company: true, region: true, submittedBy: true },
-    });
-    res.json(apps);
   }
 );
 

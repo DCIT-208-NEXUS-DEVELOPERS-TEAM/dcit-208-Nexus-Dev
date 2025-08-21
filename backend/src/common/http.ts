@@ -125,3 +125,18 @@ export const buildPaginationMeta = (
     hasPrev: page > 1,
   };
 };
+
+export const createPaginationMeta = (
+  page: number,
+  limit: number,
+  total: number
+): ApiResponse["meta"] => {
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    page,
+    limit,
+    total,
+    totalPages,
+  };
+};

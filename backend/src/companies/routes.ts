@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { prisma } from "../db/client";
 import { body, query } from "express-validator";
-import { requireRole } from "../common/middleware/rbac";
+import {
+  authenticateToken,
+  requireRole,
+  requireOwnership,
+} from "../common/middleware/auth";
 import { Role } from "@prisma/client";
+import { successResponse, errorResponse } from "../common/http";
 
 const router = Router();
 

@@ -149,3 +149,30 @@ export const requireRegionAccess = async (
 
   return next();
 };
+
+export const requireRegionScope = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return errorResponse(res, "Authentication required", 401);
+  }
+
+  // Admins and National Secretariats have global access
+  if ([Role.ADMIN, Role.NATIONAL_SECRETARIAT].includes(req.user.role as Role)) {
+    return next();
+  }
+
+  // Regional secretariat can only access their region
+  if (req.user.role === Role.REGIONAL_SECRETARIAT) {
+    const requestedRegion =
+      req.params.regionId || req.body.regionId || req.query.regionId;
+
+    if (requestedRegion && requestedRegion !== req.user.regionId) {
+      return errorResponse(res, "Access denied for this region", 403);
+    }
+  }
+
+  return next();
+};
