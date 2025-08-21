@@ -1,0 +1,180 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  NATIONAL_SECRETARIAT
+  REGIONAL_SECRETARIAT
+  COMPANY_REP
+  MEMBER
+}
+
+enum AppState {
+  DRAFT
+  SUBMITTED
+  REGION_REVIEW
+  REQUESTED_CHANGES
+  NATIONAL_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  phone        String?
+  isActive     Boolean  @default(true)
+  role         Role     @default(MEMBER)
+  regionId     String?
+  region       Region?  @relation(fields: [regionId], references: [id])
+  createdAt    DateTime @default(now())
+  companies    Company[] @relation("CompanyOwner")
+  applicationEvents ApplicationEvent[] @relation("EventActor")
+  submittedApplications MembershipApplication[] @relation("ApplicationSubmitter")
+  newsItems    News[] @relation("NewsAuthor")
+  projectItems ProjectItem[] @relation("ProjectAuthor")
+  meetings     Meeting[] @relation("MeetingCreator")
+}
+
+model Region {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  users User[]
+  applications MembershipApplication[]
+}
+
+model Company {
+  id               String   @id @default(uuid())
+  name             String
+  email            String?
+  phone            String?
+  website          String?
+  address          String?
+  gpsAddress       String?
+  region           String?  // text label (e.g., Greater Accra)
+  gradeDK          String?  // D1K1..D4K4
+  roadClass        String?  // e.g., A3 B3
+  natureOfBusiness String[] @default([])
+  description      String?
+  ownerUserId      String?
+  owner            User?    @relation("CompanyOwner", fields: [ownerUserId], references: [id])
+  createdAt        DateTime @default(now())
+
+  certificates     Certificate[]
+  equipment        Equipment[]
+  projects         CompanyProject[]
+  documents        Document[]
+  applications     MembershipApplication[]
+}
+
+model Certificate {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  type       String   // GRA, SSNIT, PPA, WorksHousing D/K, Roads A/B, ABCECG
+  number     String?
+  validFrom  DateTime?
+  validTo    DateTime?
+  fileKey    String?
+  extra      Json?
+}
+
+model Equipment {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  name       String
+  model      String?
+  year       Int?
+  ownership  String?  // Owned/Leased
+  condition  String?
+}
+
+model CompanyProject {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  title      String
+  client     String?
+  location   String?
+  year       Int?
+  status     String?  // Completed/Ongoing
+  contractAmount Decimal? @db.Decimal(18,2)
+}
+
+model MembershipApplication {
+  id             String   @id @default(uuid())
+  companyId      String   
+  company        Company  @relation(fields: [companyId], references: [id])
+  submittedById  String
+  submittedBy    User     @relation("ApplicationSubmitter", fields: [submittedById], references: [id])
+  regionId       String
+  region         Region   @relation(fields: [regionId], references: [id])
+  state          AppState @default(DRAFT)
+  reasonRejected String?
+  form           Json
+  submittedAt    DateTime?
+  decidedAt      DateTime?
+  events         ApplicationEvent[]
+  createdAt      DateTime @default(now())
+
+  @@index([state])
+  @@index([regionId])
+}
+
+model ApplicationEvent {
+  id            String   @id @default(uuid())
+  applicationId String   
+  application   MembershipApplication @relation(fields: [applicationId], references: [id])
+  action        String   // submit, request_info, region_approve, national_approve, reject
+  actorId       String   
+  actor         User     @relation("EventActor", fields: [actorId], references: [id])
+  at            DateTime @default(now())
+  meta          Json?
+}
+
+model News {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  publishedAt DateTime @default(now())
+  authorId    String?  
+  author      User?    @relation("NewsAuthor", fields: [authorId], references: [id])
+}
+
+model ProjectItem {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  publishedAt DateTime @default(now())
+  authorId    String?  
+  author      User?    @relation("ProjectAuthor", fields: [authorId], references: [id])
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  title       String
+  scheduledAt DateTime
+  link        String?
+  createdById String?  
+  createdBy   User?    @relation("MeetingCreator", fields: [createdById], references: [id])
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  companyId   String?  
+  company     Company? @relation(fields: [companyId], references: [id])
+  title       String
+  fileKey     String
+  uploadedAt  DateTime @default(now())
+}
