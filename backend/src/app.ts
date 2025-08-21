@@ -150,7 +150,8 @@ app.get("/api", (req, res) => {
   res.json({
     name: "ABCECG Membership Management API",
     version: "1.0.0",
-    description: "Association of Building and Civil Engineering Contractors of Ghana API",
+    description:
+      "Association of Building and Civil Engineering Contractors of Ghana API",
     documentation: `${req.protocol}://${req.get("host")}/docs`,
     health: `${req.protocol}://${req.get("host")}/health`,
     openapi: `${req.protocol}://${req.get("host")}/openapi.json`,

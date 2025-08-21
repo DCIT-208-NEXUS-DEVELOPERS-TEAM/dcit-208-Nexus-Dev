@@ -111,7 +111,7 @@ For testing purposes, use these seeded accounts:
             },
           },
         },
-        
+
         // User & Auth schemas
         User: {
           type: "object",
@@ -125,13 +125,19 @@ For testing purposes, use these seeded accounts:
             isActive: { type: "boolean" },
             role: {
               type: "string",
-              enum: ["ADMIN", "NATIONAL_SECRETARIAT", "REGIONAL_SECRETARIAT", "COMPANY_REP", "MEMBER"],
+              enum: [
+                "ADMIN",
+                "NATIONAL_SECRETARIAT",
+                "REGIONAL_SECRETARIAT",
+                "COMPANY_REP",
+                "MEMBER",
+              ],
             },
             regionId: { type: "string", format: "uuid", nullable: true },
             createdAt: { type: "string", format: "date-time" },
           },
         },
-        
+
         LoginRequest: {
           type: "object",
           required: ["email", "password"],
@@ -140,17 +146,18 @@ For testing purposes, use these seeded accounts:
             password: { type: "string", minLength: 8 },
           },
         },
-        
+
         RegisterRequest: {
           type: "object",
           required: ["username", "email", "password", "firstName", "lastName"],
           properties: {
             username: { type: "string", minLength: 3, maxLength: 50 },
             email: { type: "string", format: "email" },
-            password: { 
-              type: "string", 
+            password: {
+              type: "string",
               minLength: 8,
-              description: "Must contain at least one uppercase, lowercase, and number"
+              description:
+                "Must contain at least one uppercase, lowercase, and number",
             },
             firstName: { type: "string", minLength: 1, maxLength: 100 },
             lastName: { type: "string", minLength: 1, maxLength: 100 },
@@ -158,7 +165,7 @@ For testing purposes, use these seeded accounts:
             regionId: { type: "string", format: "uuid" },
           },
         },
-        
+
         AuthResponse: {
           type: "object",
           properties: {
@@ -169,7 +176,7 @@ For testing purposes, use these seeded accounts:
             refreshToken: { type: "string" },
           },
         },
-        
+
         // Region schema
         Region: {
           type: "object",
@@ -178,7 +185,7 @@ For testing purposes, use these seeded accounts:
             name: { type: "string", example: "Greater Accra" },
           },
         },
-        
+
         // Company schemas
         Company: {
           type: "object",
@@ -191,27 +198,27 @@ For testing purposes, use these seeded accounts:
             address: { type: "string", nullable: true },
             gpsAddress: { type: "string", nullable: true },
             region: { type: "string", nullable: true },
-            gradeDK: { 
-              type: "string", 
+            gradeDK: {
+              type: "string",
               nullable: true,
-              description: "Classification grade (D1K1, D2K2, etc.)"
+              description: "Classification grade (D1K1, D2K2, etc.)",
             },
-            roadClass: { 
-              type: "string", 
+            roadClass: {
+              type: "string",
               nullable: true,
-              description: "Road classification (A3, B3, etc.)"
+              description: "Road classification (A3, B3, etc.)",
             },
             natureOfBusiness: {
               type: "array",
               items: { type: "string" },
-              description: "Types of construction work"
+              description: "Types of construction work",
             },
             description: { type: "string", nullable: true },
             ownerUserId: { type: "string", format: "uuid", nullable: true },
             createdAt: { type: "string", format: "date-time" },
           },
         },
-        
+
         CompanyCreateRequest: {
           type: "object",
           required: ["name"],
@@ -227,12 +234,12 @@ For testing purposes, use these seeded accounts:
             roadClass: { type: "string" },
             natureOfBusiness: {
               type: "array",
-              items: { type: "string" }
+              items: { type: "string" },
             },
             description: { type: "string" },
           },
         },
-        
+
         // Application schemas
         MembershipApplication: {
           type: "object",
@@ -243,14 +250,26 @@ For testing purposes, use these seeded accounts:
             regionId: { type: "string", format: "uuid" },
             state: {
               type: "string",
-              enum: ["DRAFT", "SUBMITTED", "REGION_REVIEW", "REQUESTED_CHANGES", "NATIONAL_REVIEW", "APPROVED", "REJECTED"]
+              enum: [
+                "DRAFT",
+                "SUBMITTED",
+                "REGION_REVIEW",
+                "REQUESTED_CHANGES",
+                "NATIONAL_REVIEW",
+                "APPROVED",
+                "REJECTED",
+              ],
             },
             reasonRejected: { type: "string", nullable: true },
             form: {
               type: "object",
-              description: "Application form data"
+              description: "Application form data",
             },
-            submittedAt: { type: "string", format: "date-time", nullable: true },
+            submittedAt: {
+              type: "string",
+              format: "date-time",
+              nullable: true,
+            },
             decidedAt: { type: "string", format: "date-time", nullable: true },
             createdAt: { type: "string", format: "date-time" },
             company: { $ref: "#/components/schemas/Company" },
@@ -258,7 +277,7 @@ For testing purposes, use these seeded accounts:
             submittedBy: { $ref: "#/components/schemas/User" },
           },
         },
-        
+
         // Content schemas
         News: {
           type: "object",
@@ -275,11 +294,11 @@ For testing purposes, use these seeded accounts:
                 firstName: { type: "string" },
                 lastName: { type: "string" },
                 role: { type: "string" },
-              }
-            }
+              },
+            },
           },
         },
-        
+
         NewsCreateRequest: {
           type: "object",
           required: ["title", "content"],
@@ -288,7 +307,7 @@ For testing purposes, use these seeded accounts:
             content: { type: "string", minLength: 1 },
           },
         },
-        
+
         Project: {
           type: "object",
           properties: {
@@ -304,11 +323,11 @@ For testing purposes, use these seeded accounts:
                 firstName: { type: "string" },
                 lastName: { type: "string" },
                 role: { type: "string" },
-              }
-            }
+              },
+            },
           },
         },
-        
+
         ProjectCreateRequest: {
           type: "object",
           required: ["title"],
@@ -317,7 +336,7 @@ For testing purposes, use these seeded accounts:
             description: { type: "string" },
           },
         },
-        
+
         Meeting: {
           type: "object",
           properties: {
@@ -333,11 +352,11 @@ For testing purposes, use these seeded accounts:
                 firstName: { type: "string" },
                 lastName: { type: "string" },
                 role: { type: "string" },
-              }
-            }
+              },
+            },
           },
         },
-        
+
         MeetingCreateRequest: {
           type: "object",
           required: ["title", "scheduledAt"],
@@ -347,7 +366,7 @@ For testing purposes, use these seeded accounts:
             link: { type: "string", format: "uri" },
           },
         },
-        
+
         // Search schemas
         SearchResponse: {
           type: "object",
@@ -360,25 +379,25 @@ For testing purposes, use these seeded accounts:
               properties: {
                 companies: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/Company" }
+                  items: { $ref: "#/components/schemas/Company" },
                 },
                 news: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/News" }
+                  items: { $ref: "#/components/schemas/News" },
                 },
                 projects: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/Project" }
+                  items: { $ref: "#/components/schemas/Project" },
                 },
                 meetings: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/Meeting" }
+                  items: { $ref: "#/components/schemas/Meeting" },
                 },
-              }
-            }
+              },
+            },
           },
         },
-        
+
         // Health schema
         HealthResponse: {
           type: "object",
@@ -395,7 +414,7 @@ For testing purposes, use these seeded accounts:
                 heapTotal: { type: "integer" },
                 heapUsed: { type: "integer" },
                 external: { type: "integer" },
-              }
+              },
             },
             checks: {
               type: "array",
@@ -406,12 +425,12 @@ For testing purposes, use these seeded accounts:
                   status: { type: "string", enum: ["healthy", "unhealthy"] },
                   latency: { type: "integer" },
                   error: { type: "string" },
-                }
-              }
-            }
+                },
+              },
+            },
           },
         },
-        
+
         // Error schemas
         ValidationError: {
           type: "object",
@@ -425,12 +444,12 @@ For testing purposes, use these seeded accounts:
                 properties: {
                   field: { type: "string" },
                   message: { type: "string" },
-                }
-              }
-            }
+                },
+              },
+            },
           },
         },
-        
+
         UnauthorizedError: {
           type: "object",
           properties: {
@@ -438,7 +457,7 @@ For testing purposes, use these seeded accounts:
             message: { type: "string", example: "Authentication required" },
           },
         },
-        
+
         ForbiddenError: {
           type: "object",
           properties: {
@@ -446,7 +465,7 @@ For testing purposes, use these seeded accounts:
             message: { type: "string", example: "Insufficient permissions" },
           },
         },
-        
+
         NotFoundError: {
           type: "object",
           properties: {
@@ -455,42 +474,42 @@ For testing purposes, use these seeded accounts:
           },
         },
       },
-      
+
       responses: {
         ValidationError: {
           description: "Validation error",
           content: {
             "application/json": {
-              schema: { $ref: "#/components/schemas/ValidationError" }
-            }
-          }
+              schema: { $ref: "#/components/schemas/ValidationError" },
+            },
+          },
         },
         UnauthorizedError: {
           description: "Authentication required",
           content: {
             "application/json": {
-              schema: { $ref: "#/components/schemas/UnauthorizedError" }
-            }
-          }
+              schema: { $ref: "#/components/schemas/UnauthorizedError" },
+            },
+          },
         },
         ForbiddenError: {
           description: "Insufficient permissions",
           content: {
             "application/json": {
-              schema: { $ref: "#/components/schemas/ForbiddenError" }
-            }
-          }
+              schema: { $ref: "#/components/schemas/ForbiddenError" },
+            },
+          },
         },
         NotFoundError: {
           description: "Resource not found",
           content: {
             "application/json": {
-              schema: { $ref: "#/components/schemas/NotFoundError" }
-            }
-          }
+              schema: { $ref: "#/components/schemas/NotFoundError" },
+            },
+          },
         },
       },
-      
+
       parameters: {
         PageParam: {
           name: "page",
@@ -525,7 +544,7 @@ For testing purposes, use these seeded accounts:
         },
       },
     },
-    
+
     tags: [
       {
         name: "Health",
