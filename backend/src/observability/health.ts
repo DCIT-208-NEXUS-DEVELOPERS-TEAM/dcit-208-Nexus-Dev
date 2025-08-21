@@ -10,6 +10,42 @@ interface HealthCheck {
   error?: string;
 }
 
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Comprehensive health check
+ *     description: Check the health status of the API and its dependencies (database, S3, Redis)
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/HealthResponse'
+ *       503:
+ *         description: Service is unhealthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - type: object
+ *                   properties:
+ *                     success:
+ *                       type: boolean
+ *                       example: false
+ *                     message:
+ *                       type: string
+ *                       example: "Service is unhealthy"
+ *                     data:
+ *                       $ref: '#/components/schemas/HealthResponse'
+ */
 export const healthCheck = async (req: Request, res: Response) => {
   const checks: HealthCheck[] = [];
   let overallHealth = true;

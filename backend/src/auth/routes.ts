@@ -11,7 +11,48 @@ const router = Router();
 // Apply rate limiting to auth routes
 router.use(authRateLimit);
 
-// Register
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Create a new user account with email, username, and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *           example:
+ *             username: "john_doe"
+ *             email: "john@example.com"
+ *             password: "Password123"
+ *             firstName: "John"
+ *             lastName: "Doe"
+ *             phone: "+233123456789"
+ *             regionId: "uuid-region-id"
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       409:
+ *         description: Email or username already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ */
 router.post(
   "/register",
   validateBody(RegisterSchema),
@@ -25,7 +66,43 @@ router.post(
   }
 );
 
-// Login
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     description: Authenticate user with email and password, returns JWT tokens
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *           example:
+ *             email: "admin@abcecg.org"
+ *             password: "Admin@123"
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         description: Invalid credentials or account deactivated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UnauthorizedError'
+ */
 router.post("/login", validateBody(LoginSchema), async (req, res, next) => {
   try {
     const result = await AuthService.login(req.body);

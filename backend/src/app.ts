@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
 import { AppError } from "./common/errors";
 import { errorResponse } from "./common/http";
 import { requestIdMiddleware } from "./common/middleware/requestId";
@@ -12,6 +13,7 @@ import {
   livenessCheck,
 } from "./observability/health";
 import { getMetrics } from "./observability/metrics";
+import swaggerSpec from "./docs/swagger";
 import env from "./config/env";
 import logger from "./config/logger";
 
@@ -89,6 +91,34 @@ app.use((req, res, next) => {
 // Rate limiting for API routes
 app.use("/api", apiRateLimit);
 
+// Swagger UI documentation
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: `
+      .swagger-ui .topbar { display: none }
+      .swagger-ui .info { margin: 50px 0 }
+      .swagger-ui .info .title { color: #2563eb }
+    `,
+    customSiteTitle: "ABCECG API Documentation",
+    customfavIcon: "/favicon.ico",
+    swaggerOptions: {
+      docExpansion: "none",
+      filter: true,
+      showRequestHeaders: true,
+      tryItOutEnabled: true,
+    },
+  })
+);
+
+// Serve OpenAPI JSON spec
+app.get("/openapi.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 // Health and metrics endpoints (before authentication)
 app.get("/health", healthCheck);
 app.get("/health/ready", readinessCheck);
@@ -109,6 +139,34 @@ app.use("/api/meetings", meetingsRoutes);
 
 // Search routes
 app.use("/api/search", searchRoutes);
+
+// Welcome endpoint
+app.get("/", (req, res) => {
+  res.redirect("/docs");
+});
+
+// API info endpoint
+app.get("/api", (req, res) => {
+  res.json({
+    name: "ABCECG Membership Management API",
+    version: "1.0.0",
+    description: "Association of Building and Civil Engineering Contractors of Ghana API",
+    documentation: `${req.protocol}://${req.get("host")}/docs`,
+    health: `${req.protocol}://${req.get("host")}/health`,
+    openapi: `${req.protocol}://${req.get("host")}/openapi.json`,
+    endpoints: {
+      authentication: "/api/auth",
+      regions: "/api/regions",
+      companies: "/api/companies",
+      applications: "/api/applications",
+      files: "/api/files",
+      news: "/api/news",
+      projects: "/api/projects",
+      meetings: "/api/meetings",
+      search: "/api/search",
+    },
+  });
+});
 
 // 404 handler
 app.use("*", (req, res) => {
